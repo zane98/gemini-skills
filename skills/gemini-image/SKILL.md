@@ -44,7 +44,7 @@ save_dir = Path("<保存目录，默认~/Pictures/gemini-images>").expanduser()
 save_dir.mkdir(parents=True, exist_ok=True)
 
 payload = {
-    "model": "imagen-3.0-generate-002",
+    "model": "Nano-Banana-2",
     "messages": [{"role": "user", "content": prompt}],
     "size": size
 }

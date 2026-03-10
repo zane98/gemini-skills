@@ -34,7 +34,7 @@ base_url = read_env("GEMINI_BASE_URL") or "https://generativelanguage.googleapis
 query = "<用户查询内容>"
 
 payload = {
-    "model": "gemini-2.0-flash",
+    "model": "gemini-3.1-pro-preview-search",
     "messages": [
         {
             "role": "system",
