@@ -19,14 +19,24 @@ description: 使用 Gemini 生成图片并自动保存到本地。用法：/gemi
 2. 用 Python 调用 API 并保存图片：
 
 ```python
-import json, urllib.request, subprocess, base64, re
+import json, urllib.request, subprocess, base64, re, os
 from datetime import datetime
 from pathlib import Path
 
-api_key = subprocess.check_output(
-    "grep 'GEMINI_API_KEY' ~/.zshrc | head -1 | cut -d'\"' -f2",
-    shell=True
-).decode().strip()
+def read_env(var):
+    val = os.environ.get(var, "")
+    if val:
+        return val
+    try:
+        return subprocess.check_output(
+            f"grep 'export {var}' ~/.zshrc ~/.bashrc 2>/dev/null | tail -1 | cut -d'\"' -f2",
+            shell=True
+        ).decode().strip()
+    except:
+        return ""
+
+api_key = read_env("GEMINI_API_KEY")
+base_url = read_env("GEMINI_BASE_URL") or "https://generativelanguage.googleapis.com/v1beta/openai"
 
 prompt = "<图片描述>"
 size = "<尺寸，默认1024x1024>"
@@ -34,13 +44,13 @@ save_dir = Path("<保存目录，默认~/Pictures/gemini-images>").expanduser()
 save_dir.mkdir(parents=True, exist_ok=True)
 
 payload = {
-    "model": "Nano-Banana-2",
+    "model": "imagen-3.0-generate-002",
     "messages": [{"role": "user", "content": prompt}],
     "size": size
 }
 
 req = urllib.request.Request(
-    "https://api.devdove.site/v1/chat/completions",
+    f"{base_url}/chat/completions",
     data=json.dumps(payload).encode(),
     headers={
         "Content-Type": "application/json",

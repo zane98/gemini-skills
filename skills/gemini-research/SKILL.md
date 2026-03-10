@@ -14,17 +14,27 @@ description: 使用 Gemini 实时联网调研，原文输出结果。用法：/g
 2. 用 Python 调用 API：
 
 ```python
-import json, urllib.request, subprocess, sys
+import json, urllib.request, subprocess, os
 
-api_key = subprocess.check_output(
-    "grep 'GEMINI_API_KEY' ~/.zshrc | head -1 | cut -d'\"' -f2",
-    shell=True
-).decode().strip()
+def read_env(var):
+    val = os.environ.get(var, "")
+    if val:
+        return val
+    try:
+        return subprocess.check_output(
+            f"grep 'export {var}' ~/.zshrc ~/.bashrc 2>/dev/null | tail -1 | cut -d'\"' -f2",
+            shell=True
+        ).decode().strip()
+    except:
+        return ""
+
+api_key = read_env("GEMINI_API_KEY")
+base_url = read_env("GEMINI_BASE_URL") or "https://generativelanguage.googleapis.com/v1beta/openai"
 
 query = "<用户查询内容>"
 
 payload = {
-    "model": "gemini-3.1-pro-preview-search",
+    "model": "gemini-2.0-flash",
     "messages": [
         {
             "role": "system",
@@ -35,7 +45,7 @@ payload = {
 }
 
 req = urllib.request.Request(
-    "https://api.devdove.site/v1/chat/completions",
+    f"{base_url}/chat/completions",
     data=json.dumps(payload).encode(),
     headers={
         "Content-Type": "application/json",
